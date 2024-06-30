@@ -10,14 +10,20 @@ def get_all_mappings() -> dict:
     data = json.load(f)
   return data
 
-def generate_insert_command(all_symptoms:list, mappings:dict, id:str) -> str:
+def generate_insert_command(od_symptoms:list, os_symptoms:list, mappings:dict, id:str) -> str:
   all_columns = ''
   res = ''
-  print(all_symptoms)
-  for symptom in all_symptoms:
+  print(od_symptoms, os_symptoms)
+  for symptom in od_symptoms:
     mapped_val = mappings[symptom]
     if mapped_val != "":
       all_columns += f'{mapped_val}_od=\'Yes\', '
+  
+  for symptom in od_symptoms:
+    mapped_val = mappings[symptom]
+    if mapped_val != "":
+      all_columns += f'{mapped_val}_os=\'Yes\', '
+  
   if all_columns != '':
     res = f"UPDATE {table_name} SET {all_columns[:-2]} WHERE id='{id}'"
     print(res)
@@ -39,9 +45,11 @@ def iterate_with_values(db_path, table_name, columns):
     # yield row
     data = dict(row)
     id = data['id']
-    list_of_symptoms = data['cause_loss_va_od'] + ',' + data['cause_loss_va_os']
-    all_symptoms = list_of_symptoms.split(',')
-    sql_command_2 = generate_insert_command(all_symptoms, mappings, id)
+    od_symptoms = data['cause_loss_va_od'].split(',')
+    os_symptoms = data['cause_loss_va_os'].split(',')
+    # list_of_symptoms = data['cause_loss_va_od'] + ',' + data['cause_loss_va_os']
+    # all_symptoms = list_of_symptoms.split(',')
+    sql_command_2 = generate_insert_command(od_symptoms, os_symptoms, mappings, id)
     if sql_command_2 != '':
       cur2.execute(sql_command_2)
 
