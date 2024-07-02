@@ -15,14 +15,16 @@ def generate_insert_command(od_symptoms:list, os_symptoms:list, mappings:dict, i
   res = ''
   print(od_symptoms, os_symptoms)
   for symptom in od_symptoms:
-    mapped_val = mappings[symptom]
-    if mapped_val != "":
-      all_columns += f'{mapped_val}_od=\'Yes\', '
-  
+    mapped_vals = mappings[symptom]
+    for mapped_val in mapped_vals:
+      if mapped_val != "":
+        all_columns += f'{mapped_val}_od=\'Yes\', '
+    
   for symptom in od_symptoms:
-    mapped_val = mappings[symptom]
-    if mapped_val != "":
-      all_columns += f'{mapped_val}_os=\'Yes\', '
+    mapped_vals = mappings[symptom]
+    for mapped_val in mapped_vals:
+      if mapped_val != "":
+        all_columns += f'{mapped_val}_os=\'Yes\', '
   
   if all_columns != '':
     res = f"UPDATE {table_name} SET {all_columns[:-2]} WHERE id='{id}'"
@@ -52,10 +54,9 @@ def iterate_with_values(db_path, table_name, columns):
     sql_command_2 = generate_insert_command(od_symptoms, os_symptoms, mappings, id)
     if sql_command_2 != '':
       cur2.execute(sql_command_2)
+      conn.commit()
 
   conn.close()
 
 if __name__ == "__main__":
   iterate_with_values(db_path, table_name, columns_to_check)
-
-
